@@ -89,6 +89,30 @@ class SamPredictor:
         self.features = self.model.image_encoder(input_image)
         self.is_image_set = True
 
+    @torch.no_grad()
+    def set_image_features(
+        self,
+        features: torch.Tensor,
+        transformed_image: torch.Tensor,
+        original_image_size: Tuple[int, ...],
+    ) -> None:
+        """
+        Sets the image features directly, allowing masks to be predicted
+        with the 'predict' method.
+
+        Arguments:
+          features (torch.Tensor): The image features, with shape Cx64x64.
+          transformed_image (torch.Tensor): The input image, with shape
+            1x3xHxW, which has been transformed with ResizeLongestSide.
+          original_image_size (tuple(int, int)): The size of the image
+            before transformation, in (H, W) format.
+        """
+        self.reset_image()
+        self.original_size = original_image_size
+        self.input_size = tuple(transformed_image.shape[-2:])
+        self.features = features
+        self.is_image_set = True
+
     def predict(
         self,
         point_coords: Optional[np.ndarray] = None,
